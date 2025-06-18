@@ -1,4 +1,3 @@
-// filepath: /home/ovni/code/tech-site-ui/backend/server.js
 const express = require('express');
 const cors = require('cors'); // 1. Import cors
 const complaintsRouter = require('./routes/complaints');
