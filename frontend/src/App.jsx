@@ -4,7 +4,7 @@ import ComplaintForm from './ComplaintForm';
 import ComplaintList from './ComplaintList';
 import Login from './Login';
 import Register from './Register';
-import UserManagement from './UserManagement'; // Add this import
+import UserManagement from './UserManagement';
 import './App.css';
 
 export default function App() {
@@ -29,23 +29,31 @@ export default function App() {
     if (user) {
       const getComplaints = async () => {
         try {
+          console.log('Fetching complaints for user:', user.username); // Debug log
           const response = await fetchComplaints();
+          console.log('Complaints fetched successfully:', response.data); // Debug log
           setComplaints(response.data);
         } catch (error) {
           console.error("Error fetching complaints:", error);
+          console.error("Error response:", error.response?.data);
           // If token is invalid, logout user
           if (error.response?.status === 401 || error.response?.status === 403) {
+            console.log('Token invalid, logging out user');
             handleLogout();
           }
         }
       };
-      getComplaints();
+      
+      // Add a small delay to ensure token is properly set
+      setTimeout(getComplaints, 100);
     }
   }, [user]);
 
   const handleLogin = (userData) => {
+    console.log('Setting user state:', userData);
     setUser(userData);
     setShowRegister(false); // Hide register form after login
+    // Remove the undefined setLoginView(false) line
   };
 
   const handleLogout = () => {
@@ -127,7 +135,6 @@ export default function App() {
         </div>
       </div>
       
-      {/* Add this line - User Management for admins only */}
       {user.role === 'admin' && <UserManagement user={user} />}
       
       <ComplaintForm onComplaintSubmit={handleAddComplaint} />

@@ -20,7 +20,8 @@ db.serialize(() => {
 });
 
 // GET all complaints - different data based on role
-router.get('/', authenticateToken, (req, res) => {
+router.get('/', require('../middleware/auth').authenticateToken, (req, res) => {
+  console.log('Getting complaints for user:', req.user.username);
   const isAdmin = req.user.role === 'admin';
   
   if (isAdmin) {

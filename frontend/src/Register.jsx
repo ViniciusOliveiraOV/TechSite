@@ -15,35 +15,36 @@ export default function Register({ onRegisterSuccess, onBackToLogin }) {
     setError('');
     setSuccess('');
 
-    // Basic validation
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       setLoading(false);
       return;
     }
 
-    if (password.length < 4) {
-      setError('Password must be at least 4 characters');
-      setLoading(false);
-      return;
-    }
-
     try {
-      await register({ username, password });
-      setSuccess('Account created successfully! You can now log in.');
-      
-      // Clear form
+      const response = await register({ username, password });
+      setSuccess('Registration successful! You can now login.');
       setUsername('');
       setPassword('');
       setConfirmPassword('');
       
-      // Optional: Auto-redirect to login after 2 seconds
+      // Optionally auto-switch to login after a delay
       setTimeout(() => {
-        onRegisterSuccess();
+        onBackToLogin();
       }, 2000);
-      
     } catch (err) {
-      setError(err.response?.data?.error || 'Registration failed');
+      console.error('Registration error:', err);
+      console.error('Error response:', err.response?.data);
+      
+      if (err.response?.data?.error) {
+        setError(err.response.data.error);
+      } else if (err.response?.data?.details) {
+        // Show validation details if available
+        const details = err.response.data.details.map(d => d.msg).join(', ');
+        setError(`Validation errors: ${details}`);
+      } else {
+        setError('Registration failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

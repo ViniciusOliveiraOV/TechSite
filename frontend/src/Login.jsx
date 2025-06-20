@@ -13,17 +13,25 @@ export default function Login({ onLogin, onShowRegister }) {
     setError('');
 
     try {
+      console.log('Attempting login with:', { username, password }); // Debug log
       const response = await login({ username, password });
-      const { token, user } = response.data;
+      console.log('Login response:', response.data); // Debug log
       
-      // Store token and user info
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      
-      // Call parent function to update app state
-      onLogin(user);
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      onLogin(response.data.user);
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed');
+      console.error('Login error:', err);
+      console.error('Error response:', err.response?.data); // Debug log
+      
+      if (err.response?.data?.error) {
+        setError(err.response.data.error);
+      } else if (err.response?.data?.details) {
+        const details = err.response.data.details.map(d => d.msg).join(', ');
+        setError(`Validation errors: ${details}`);
+      } else {
+        setError('Login failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
