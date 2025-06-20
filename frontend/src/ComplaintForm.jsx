@@ -1,8 +1,8 @@
 // src/ComplaintForm.jsx
 import { useState } from 'react';
-import { postComplaint } from './api';
 
-export default function ComplaintForm() {
+// Accept the onComplaintSubmit function as a prop
+export default function ComplaintForm({ onComplaintSubmit }) {
   const [user, setUser] = useState('');
   const [email, setEmail] = useState('');
   const [complaint, setComplaint] = useState('');
@@ -11,7 +11,8 @@ export default function ComplaintForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await postComplaint({ user, email, complaint });
+      // Call the function passed from App.jsx instead of calling the API directly
+      await onComplaintSubmit({ user, email, complaint });
       setStatus('Complaint sent ✅');
       setUser('');
       setEmail('');
