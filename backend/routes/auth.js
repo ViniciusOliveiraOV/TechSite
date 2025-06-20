@@ -16,8 +16,8 @@ db.serialize(() => {
     role TEXT DEFAULT 'user'
   )`);
   
-  // Create default admin user (password: admin123)
-  const adminPassword = bcrypt.hashSync('admin123', 10);
+  // Create default admin user
+  const adminPassword = bcrypt.hashSync('password', 10);
   db.run(`INSERT OR IGNORE INTO users (username, password, role) VALUES (?, ?, ?)`, 
     ['admin', adminPassword, 'admin']
   );
