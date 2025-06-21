@@ -248,4 +248,30 @@ router.put('/users/:id/role', require('../middleware/auth').authenticateToken, r
   });
 });
 
+// Add this TEMPORARY route after your other routes (remove after testing)
+router.post('/reset-admin', (req, res) => {
+  const adminPassword = bcrypt.hashSync('admin123', 10);
+  
+  db.run(`DELETE FROM users WHERE username = 'admin'`, function(err) {
+    if (err) console.error('Error deleting admin:', err);
+    
+    db.run(`INSERT INTO users (username, password, role) VALUES (?, ?, ?)`,
+      ['admin', adminPassword, 'admin'],
+      function(err) {
+        if (err) {
+          console.error('Error creating admin:', err);
+          return res.status(500).json({ error: 'Failed to reset admin' });
+        }
+        console.log('Admin user reset successfully');
+        res.json({ message: 'Admin user reset successfully' });
+      }
+    );
+  });
+});
+
+// TEMPORARY CODE FOR TESTING - REMOVE AFTER TESTING
+fetch('http://localhost:3001/api/auth/reset-admin', { method: 'POST' })
+  .then(r => r.json())
+  .then(console.log);
+
 module.exports = router;

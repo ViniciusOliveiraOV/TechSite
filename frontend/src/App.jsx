@@ -7,11 +7,33 @@ import Register from './Register';
 import UserManagement from './UserManagement';
 import './App.css';
 
+const TERMINAL_MESSAGES = {
+  welcome: "BEM-VINDO AO TECHSITE!",
+  loading: "CARREGANDO SISTEMA...",
+  error: "ERRO NO SISTEMA",
+  success: "OPERAÇÃO CONCLUÍDA",
+  unauthorized: "ACESSO NEGADO",
+  processing: "PROCESSANDO..."
+};
+
+// Add navigation sections
+const NAVIGATION_SECTIONS = [
+  { id: 'complaints', label: 'Reclamações'},
+  { id: 'analysis', label: 'Análises'},
+  { id: 'articles', label: 'Artigos'},
+  { id: 'news', label: 'Notícias'},
+  { id: 'videos', label: 'Vídeos'},
+  { id: 'products', label: 'Produtos'},
+  { id: 'tutorials', label: 'Tutoriais'},
+  { id: 'about', label: 'Sobre' }
+];
+
 export default function App() {
   const [complaints, setComplaints] = useState([]);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showRegister, setShowRegister] = useState(false);
+  const [activeSection, setActiveSection] = useState('complaints'); // Add active section state
 
   // Check if user is already logged in on app start
   useEffect(() => {
@@ -48,6 +70,10 @@ export default function App() {
       setTimeout(getComplaints, 100);
     }
   }, [user]);
+
+  const handleSectionChange = (sectionId) => { 
+    setActiveSection(sectionId);
+  };
 
   const handleLogin = (userData) => {
     console.log('Setting user state:', userData);
@@ -96,7 +122,7 @@ export default function App() {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>{TERMINAL_MESSAGES.loading}</div>;
   }
 
   // Show register form
@@ -121,32 +147,174 @@ export default function App() {
 
   // Show main app if user is authenticated
   return (
-    <div className="p-4 bg-pukeYellow min-h-screen font-retro">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-cyberBlue text-4xl underline">🧰 Tech Complaint Portal</h1>
-        <div className="text-right">
-          <p>Welcome, <strong>{user.username}</strong> ({user.role})</p>
-          <button 
-            onClick={handleLogout}
-            className="p-1 bg-red-600 text-white border border-black mt-1"
-          >
-            Logout
+    <div className="app-container">
+      {/* Sidebar Navigation */}
+      <div className="sidebar">
+        <div className="sidebar-header">
+          <div className="sidebar-title">MENU</div>
+        </div>
+        <nav className="sidebar-nav">
+          {NAVIGATION_SECTIONS.map((section) => (
+            <button
+              key={section.id}
+              className={`sidebar-item ${activeSection === section.id ? 'active' : ''}`}
+              onClick={() => handleSectionChange(section.id)}
+            >
+              <span className="sidebar-icon">{section.icon}</span>
+              <span className="sidebar-label">{section.label}</span>
+            </button>
+          ))}
+        </nav>
+        
+        {/* User info at bottom of sidebar */}
+        <div className="sidebar-footer">
+          <div className="user-info">
+            <div className="user-name">{user.username.toUpperCase()}</div>
+            <div className="user-role">{user.role.toUpperCase()}</div>
+          </div>
+          <button onClick={handleLogout} className="logout-btn">
+            ► SAIR
           </button>
         </div>
       </div>
-      
-      {user.role === 'admin' && <UserManagement user={user} />}
-      
-      <ComplaintForm onComplaintSubmit={handleAddComplaint} />
-      <hr className="border-retroGray my-4" />
-      <span className="text-red-600 blink">🔥 Urgent!</span>
-      <h2 className="text-2xl mb-2">All Complaints</h2>
-      <ComplaintList 
-        complaints={complaints} 
-        onDelete={handleDelete}
-        userRole={user.role}
-      />
-      <footer className="mt-8 text-sm">© 1998 TechPortal.com</footer>
+
+      {/* Main Content Area */}
+      <div className="main-content">
+        <div className="crt-monitor">
+          <div className="terminal-header">
+            <div className="terminal-title">
+              ████ PORTAL DE RECLAMAÇÕES ████
+            </div>
+            <div className="terminal-subtitle">
+              &gt; SISTEMA DE GERENCIAMENTO TÉCNICO &lt;
+            </div>
+          </div>
+
+          <div className="status-bar">
+            <div>
+              STATUS: <span className="terminal-success">CONECTADO</span><span className="blink">_</span>
+            </div>
+            <div>
+              SEÇÃO: <span className="terminal-warning">{NAVIGATION_SECTIONS.find(s => s.id === activeSection)?.label.toUpperCase()}</span>
+            </div>
+            <div>
+              USUÁRIO: <span className="terminal-blue">{user.username.toUpperCase()}</span>
+            </div>
+          </div>
+
+          {/* Content based on active section */}
+          <div className="content-area">
+            {activeSection === 'complaints' && (
+              <>
+                {user.role === 'admin' && <UserManagement user={user} />}
+                <ComplaintForm onComplaintSubmit={handleAddComplaint} />
+                <div className="section-divider">
+                  <span className="urgent-indicator">🔥 URGENTE!</span>
+                  <h2 className="section-title">TODAS AS RECLAMAÇÕES</h2>
+                </div>
+                <ComplaintList 
+                  complaints={complaints} 
+                  onDelete={handleDelete}
+                  userRole={user.role}
+                />
+              </>
+            )}
+            
+            {activeSection === 'analysis' && (
+              <div className="section-content">
+                <h2 className="section-title">📊 ANÁLISES DO SISTEMA</h2>
+                <div className="coming-soon">
+                  <p>► Estatísticas de reclamações</p>
+                  <p>► Relatórios de desempenho</p>
+                  <p>► Gráficos de tendências</p>
+                  <p className="terminal-warning">MÓDULO EM DESENVOLVIMENTO...</p>
+                </div>
+              </div>
+            )}
+
+            {activeSection === 'articles' && (
+              <div className="section-content">
+                <h2 className="section-title">📰 ARTIGOS TÉCNICOS</h2>
+                <div className="coming-soon">
+                  <p>► Guias de solução de problemas</p>
+                  <p>► Artigos sobre hardware</p>
+                  <p>► Dicas de manutenção</p>
+                  <p className="terminal-warning">MÓDULO EM DESENVOLVIMENTO...</p>
+                </div>
+              </div>
+            )}
+
+            {activeSection === 'news' && (
+              <div className="section-content">
+                <h2 className="section-title">📢 NOTÍCIAS TECNOLÓGICAS</h2>
+                <div className="coming-soon">
+                  <p>► Últimas novidades em tech</p>
+                  <p>► Lançamentos de produtos</p>
+                  <p>► Atualizações do sistema</p>
+                  <p className="terminal-warning">MÓDULO EM DESENVOLVIMENTO...</p>
+                </div>
+              </div>
+            )}
+
+            {activeSection === 'videos' && (
+              <div className="section-content">
+                <h2 className="section-title">🎥 TUTORIAIS EM VÍDEO</h2>
+                <div className="coming-soon">
+                  <p>► Vídeos de reparo</p>
+                  <p>► Demonstrações práticas</p>
+                  <p>► Cursos online</p>
+                  <p className="terminal-warning">MÓDULO EM DESENVOLVIMENTO...</p>
+                </div>
+              </div>
+            )}
+
+            {activeSection === 'products' && (
+              <div className="section-content">
+                <h2 className="section-title">🛠️ CATÁLOGO DE PRODUTOS</h2>
+                <div className="coming-soon">
+                  <p>► Peças de reposição</p>
+                  <p>► Ferramentas técnicas</p>
+                  <p>► Equipamentos</p>
+                  <p className="terminal-warning">MÓDULO EM DESENVOLVIMENTO...</p>
+                </div>
+              </div>
+            )}
+
+            {activeSection === 'tutorials' && (
+              <div className="section-content">
+                <h2 className="section-title">📚 TUTORIAIS PASSO-A-PASSO</h2>
+                <div className="coming-soon">
+                  <p>► Guias de instalação</p>
+                  <p>► Procedimentos de reparo</p>
+                  <p>► Manuais técnicos</p>
+                  <p className="terminal-warning">MÓDULO EM DESENVOLVIMENTO...</p>
+                </div>
+              </div>
+            )}
+
+            {activeSection === 'about' && (
+              <div className="section-content">
+                <h2 className="section-title">ℹ️ SOBRE O TECHSITE</h2>
+                <div className="about-content">
+                  <p>████ PORTAL TÉCNICO DESDE 1998 ████</p>
+                  <p>Versão: 2.0.1</p>
+                  <p>Sistema: LINUX/APACHE</p>
+                  <p>Banco de dados: SQLite</p>
+                  <p>Interface: RETRO TERMINAL</p>
+                  <br />
+                  <p>► Suporte técnico especializado</p>
+                  <p>► Comunidade ativa de usuários</p>
+                  <p>► Banco de dados de soluções</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <footer className="terminal-footer">
+            © 1998 TechPortal.com - Sistema de Gerenciamento Técnico
+          </footer>
+        </div>
+      </div>
     </div>
   );
 }

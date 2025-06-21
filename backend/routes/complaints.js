@@ -13,11 +13,11 @@ db.serialize(() => {
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user TEXT,
     complaint TEXT,
-    date TEXT,
+    date TEXT, 
     hour TEXT,
     email TEXT
   )`);
-});
+}); // timestamp
 
 // GET all complaints - different data based on role
 router.get('/', require('../middleware/auth').authenticateToken, (req, res) => {
@@ -42,9 +42,12 @@ router.get('/', require('../middleware/auth').authenticateToken, (req, res) => {
 // POST - anyone can create complaints
 router.post('/', authenticateToken, (req, res) => {
   const { user, complaint, email } = req.body;
+  console.log(user,complaint,email);
+ 
 
   // Simple validation
   if (!user || !complaint || !email) {
+    console.log(user,complaint,email);
     return res.status(400).send("All fields are required.");
   }
 
