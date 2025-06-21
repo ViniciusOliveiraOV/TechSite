@@ -4,9 +4,9 @@ import React, { useState } from 'react';
 // Accept the onComplaintSubmit function as a prop
 export default function ComplaintForm({ onComplaintSubmit }) {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    description: ''
+    user: '',        // Changed from 'name' to 'user' (backend expects 'user')
+    email: '',       // Keep this
+    complaint: '',   // Changed from 'description' to 'complaint' (backend expects 'complaint')
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
@@ -23,13 +23,29 @@ export default function ComplaintForm({ onComplaintSubmit }) {
     setLoading(true);
     setMessage({ type: '', text: '' });
 
+    // Send exactly what backend expects
+    const backendFormData = {
+      user: formData.user,
+      complaint: formData.complaint,
+      email: formData.email
+    };
+
+    console.log('Sending exactly what backend expects:', backendFormData);
+
     try {
-      // Call the function passed from App.jsx instead of calling the API directly
-      await onComplaintSubmit(formData);
-      setFormData({ name: '', email: '', date: '', hour: '', description: '' });
+      await onComplaintSubmit(backendFormData);
+      setFormData({ 
+        user: '', 
+        email: '', 
+        complaint: ''
+      });
       setMessage({ type: 'success', text: 'Reclamação enviada com sucesso!' });
     } catch (error) {
-      setMessage({ type: 'error', text: 'Falha ao enviar reclamação. Tente novamente.' });
+      console.error('ComplaintForm error:', error.response?.data);
+      setMessage({ 
+        type: 'error', 
+        text: error.response?.data?.error || 'Falha ao enviar reclamação. Tente novamente.' 
+      });
     } finally {
       setLoading(false);
     }
@@ -49,24 +65,24 @@ export default function ComplaintForm({ onComplaintSubmit }) {
 
       <div className="form-grid">
         <div className="form-group">
-          <label className="form-label" htmlFor="name">
-            Nome do Usuário
+          <label className="form-label" htmlFor="user">
+            Seu Nome
           </label>
           <input
             type="text"
-            id="name" // unique key? ... autoincrement...
-            name="name"
-            value={formData.name}
+            id="user"
+            name="user"
+            value={formData.user}
             onChange={handleChange}
             className="retro-input"
-            placeholder="Digite seu nome..."
+            placeholder="Digite seu nome"
             required
           />
         </div>
 
         <div className="form-group">
           <label className="form-label" htmlFor="email">
-            Email
+            Seu Email
           </label>
           <input
             type="email"
@@ -75,23 +91,24 @@ export default function ComplaintForm({ onComplaintSubmit }) {
             value={formData.email}
             onChange={handleChange}
             className="retro-input"
-            placeholder="Digite seu email..."
+            placeholder="Digite seu email"
             required
           />
         </div>
 
         <div className="form-group full-width">
-          <label className="form-label" htmlFor="description">
-            Descrição do Problema
+          <label className="form-label" htmlFor="complaint">
+            Descrição da Reclamação
           </label>
           <textarea
-            id="description"
-            name="description"
-            value={formData.description}
+            id="complaint"
+            name="complaint"
+            value={formData.complaint}
             onChange={handleChange}
             className="retro-textarea"
-            placeholder="Descreva seu problema detalhadamente..."
+            placeholder="Descreva seu problema detalhadamente: empresa, produto, o que aconteceu..."
             required
+            rows="6"
           />
         </div>
       </div>

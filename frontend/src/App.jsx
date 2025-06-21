@@ -103,11 +103,19 @@ export default function App() {
   };
 
   const handleAddComplaint = async (formData) => {
+    console.log('App.jsx - Sending formData:', formData); // Debug log
     try {
       const response = await postComplaint(formData);
+      console.log('App.jsx - Response:', response.data); // Debug log
       setComplaints([...complaints, response.data]);
     } catch (error) {
       console.error("Failed to post complaint:", error);
+      console.error("Error details:", error.response?.data); // More detailed error
+      console.error("Status:", error.response?.status); // HTTP status
+      console.log('Form data that failed:', formData);
+      
+      // Show user-friendly error
+      alert(`Erro ao enviar reclamação: ${error.response?.data?.error || 'Erro desconhecido'}`);
     }
   };
 

@@ -42,14 +42,20 @@ router.get('/', require('../middleware/auth').authenticateToken, (req, res) => {
 // POST - anyone can create complaints
 router.post('/', authenticateToken, (req, res) => {
   const { user, complaint, email } = req.body;
-  console.log(user,complaint,email);
+
+  //const user = req.body.user;
+  //const complaint = req.body.complaint;
+  //const email = req.body.email.
+ 
  
 
   // Simple validation
   if (!user || !complaint || !email) {
-    console.log(user,complaint,email);
+      console.log("AAAAAAA");
+      console.log(typeof user, typeof complaint, typeof email);
     return res.status(400).send("All fields are required.");
   }
+  console.log(req.body);
 
   const now = new Date();
   const date = now.toLocaleDateString('pt-BR');
