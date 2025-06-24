@@ -61,6 +61,7 @@ export default function App() {
           // If token is invalid, logout user
           if (error.response?.status === 401 || error.response?.status === 403) {
             console.log('Token invalid, logging out user');
+            console.log('footer');
             handleLogout();
           }
         }
