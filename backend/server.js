@@ -12,14 +12,20 @@ const app = express();
 // Security middleware
 app.use(helmet());
 
+/*
+const csurf = require('csurf');
+app.use(csurf({ cookie: true }));
+// Middleware to set CSRF token in response headers
+*/
+
 // CORS configuration
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? ['https://your-frontend-domain.com'] 
-    : ['http://localhost:5173', 'http://localhost:3000'],
+    : ['http://localhost:5174', 'http://localhost:3000'],
   credentials: true, // This allows cookies/credentials
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'], // cuidado com isto quando usar cookies HttpOnly. 
   optionsSuccessStatus: 200 // For legacy browser support
 }));
 
@@ -29,6 +35,12 @@ const globalLimiter = rateLimit({
   max: 100, // limit each IP to 100 requests per windowMs
   message: { error: 'Too many requests from this IP, please try again later.' }
 });
+/* usar rate limiting mais específico:
+
+const loginLimiter = rateLimit({ windowMs: 60_000, max: 5 });
+app.use('/api/auth/login', loginLimiter);
+
+*/
 
 app.use(globalLimiter);
 app.use(express.json({ limit: '10mb' }));
@@ -39,9 +51,13 @@ app.use('/api/complaints', complaintsRouter);
 
 // Add this debugging middleware to see what routes are being hit
 app.use('*', (req, res) => {
-  console.log(`Unmatched route: ${req.method} ${req.originalUrl}`);
+  //console.log(`Unmatched route: ${req.method} ${req.originalUrl}`); // log nao anonimizado
+  console.log(`Unmatched route: ${req.method} ${req.path}`);
   res.status(404).send(`Cannot ${req.method} ${req.originalUrl}`);
 });
+/*
+Em produção, evita logar tudo no console. Usa algo tipo winston ou pino.
+*/
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

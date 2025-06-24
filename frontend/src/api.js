@@ -8,6 +8,9 @@ const API = axios.create({
 // Add token to requests automatically
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
+  /*
+  Migrar de localStorage para cookies com flag HttpOnly e Secure, usando Set-Cookie no login.
+  */
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
     console.log('Authorization header set:', config.headers.Authorization.substring(0, 30) + '...');
@@ -22,7 +25,7 @@ API.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.reload();
+      window.location.reload(); // adicionar aviso de login com sucesso!
     }
     return Promise.reject(error);
   }
