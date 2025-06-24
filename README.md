@@ -73,3 +73,4 @@ A API do backend fornece os seguintes endpoints:
 
 - `GET /api/complaints`: Retorna uma lista de todas as reclamações.
 - `POST /api/complaints`: Cria uma nova reclamação. O corpo da requisição deve ser um JSON com `user`, `complaint`, e `email`.
+# Test CI
