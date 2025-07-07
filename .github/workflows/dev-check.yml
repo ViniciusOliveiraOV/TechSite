@@ -7,7 +7,7 @@ on:
     branches: [stage]
 
 jobs:
-  frontend-check:
+   frontend-check:
     name: 🎨 Frontend
     runs-on: ubuntu-latest
     defaults:

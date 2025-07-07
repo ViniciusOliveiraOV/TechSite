@@ -1,0 +1,17 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    name: 🚀 Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔄 Checkout
+        uses: actions/checkout@v4
+        
+      - name: 🚀 Deploy to Production
+        run: echo "Deploying to production..."
+        # ...
