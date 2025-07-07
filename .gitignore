@@ -36,3 +36,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Environment variables
+backend/.env
+frontend/.env
+frontend/.env.local
+.env
+.env.*
