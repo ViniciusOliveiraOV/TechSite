@@ -10,7 +10,27 @@ require('dotenv').config();
 const app = express();
 
 // Security middleware
-app.use(helmet());
+const isProd = process.env.NODE_ENV === 'production';
+
+if (isProd) {
+  // In production use helmet defaults (more strict)
+  app.use(helmet());
+} else {
+  // During development allow Vite dev server (HMR) scripts and inline scripts/styles
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", 'http://localhost:5173', 'http://127.0.0.1:5173'],
+        connectSrc: ["'self'", 'ws://localhost:5173', 'http://localhost:5173', 'http://127.0.0.1:5173'],
+        imgSrc: ["'self'", 'data:'],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        objectSrc: ["'none'"],
+        baseUri: ["'self'"]
+      }
+    }
+  }));
+}
 
 /*
 const csurf = require('csurf');
@@ -19,15 +39,39 @@ app.use(csurf({ cookie: true }));
 */
 
 // CORS configuration
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://your-frontend-domain.com'] 
-    : ['http://localhost:5174', 'http://localhost:3000'],
-  credentials: true, // This allows cookies/credentials
+// Since frontend uses Vite proxy during development, CORS is only needed for:
+// 1. Direct backend testing (curl, Postman, etc.)
+// 2. Production frontend (set FRONTEND_ORIGIN env var to your production domain)
+const allowedOrigins = process.env.FRONTEND_ORIGIN 
+  ? [process.env.FRONTEND_ORIGIN]
+  : []; // In dev with proxy, no origins needed (proxy makes requests same-origin)
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g., curl, Postman, same-origin via proxy)
+    if (!origin) return callback(null, true);
+    
+    // In production, check against whitelist
+    if (allowedOrigins.length > 0 && allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    // In development with no FRONTEND_ORIGIN set, allow any origin as fallback
+    if (!process.env.FRONTEND_ORIGIN && !isProd) {
+      return callback(null, true);
+    }
+    
+    // Reject if not whitelisted
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true, // allow cookies/auth headers
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'], // cuidado com isto quando usar cookies HttpOnly. 
-  optionsSuccessStatus: 200 // For legacy browser support
-}));
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Handle preflight
 
 // Global rate limiting
 const globalLimiter = rateLimit({

@@ -269,9 +269,6 @@ router.post('/reset-admin', (req, res) => {
   });
 });
 
-// TEMPORARY CODE FOR TESTING - REMOVE AFTER TESTING
-fetch('http://localhost:3001/api/auth/reset-admin', { method: 'POST' })
-  .then(r => r.json())
-  .then(console.log);
+// Note: removed an automatic fetch call that ran during module load. Keep routes passive.
 
 module.exports = router;
